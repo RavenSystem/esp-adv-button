@@ -1,8 +1,8 @@
 # Component makefile for adv_button
 
-INC_DIRS += $(adv_button_ROOT)
+INC_DIRS += $(esp_adv_button_ROOT)
 
-adv_button_INC_DIR = $(adv_button_ROOT)
-adv_button_SRC_DIR = $(adv_button_ROOT)
+adv_button_INC_DIR = $(esp_adv_button_ROOT)
+adv_button_SRC_DIR = $(esp_adv_button_ROOT)
 
-$(eval $(call component_compile_rules,adv_button))
+$(eval $(call component_compile_rules,esp_adv_button))
