@@ -1,4 +1,4 @@
-# esp-adv-button
+# esp-adv-button library
 
 ```
 /*
