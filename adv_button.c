@@ -53,6 +53,7 @@ typedef struct _adv_button {
     
     bool state;
     bool old_state;
+    volatile bool disable_press_when_hold;
     volatile uint16_t value;
 
     uint8_t press_count;
@@ -118,6 +119,12 @@ IRAM static void push_up(const uint8_t used_gpio) {
         sdk_os_timer_disarm(&button->hold_timer);
         button->hold_count = 0;
         
+	//ignore press events when hold event fired
+	if (button->disable_press_when_hold == true) {
+	    button->disable_press_when_hold = false;
+	    return;
+	}
+
         if (now - button->last_event_time > VERYLONGPRESS_TIME / portTICK_PERIOD_MS) {
             // Very Long button pressed
             button->press_count = 0;
@@ -147,7 +154,7 @@ IRAM static void push_up(const uint8_t used_gpio) {
                 sdk_os_timer_arm(&button->press_timer, DOUBLEPRESS_TIME, 0);
             }
         } else {
-            button->singlepress_callback_fn(used_gpio, button->singlepress_args);
+	    button->singlepress_callback_fn(used_gpio, button->singlepress_args);
         }
     }
 }
@@ -175,6 +182,7 @@ static void adv_button_hold_callback(void *arg) {
             button->hold_count = 0;
             button->press_count = 0;
             if (button->holdpress_callback_fn) {
+		button->disable_press_when_hold = true;
                 button->holdpress_callback_fn(button->gpio, button->holdpress_args);
             } else {
                 no_function_callback(button->gpio, NULL);
