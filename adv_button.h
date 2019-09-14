@@ -31,15 +31,25 @@ int adv_button_create(const uint8_t gpio, const bool pullup_resistor, const bool
 void adv_button_destroy(const uint8_t gpio);
 void adv_button_set_disable_time();
 
+typedef enum {
+    button_event_type_singlepress0,
+    button_event_type_singlepress,
+    button_event_type_doublepress,
+    button_event_type_longpress,
+    button_event_type_verylongpress,
+    button_event_type_holdpress
+} button_event_type_t;
+
+
 /*
- * Button callback types:
- * 0 Single press (inverted to 1)
- * 1 Single press
- * 2 Double press
- * 3 Long press
- * 4 Very long press
- * 5 Hold press
+ *  Button callback types:
+ *  button_event_type_singlepress0,
+ *  button_event_type_singlepress,
+ *  button_event_type_doublepress,
+ *  button_event_type_longpress,
+ *  button_event_type_verylongpress,
+ *  button_event_type_holdpress
  */
-int adv_button_register_callback_fn(const uint8_t gpio, const button_callback_fn callback, const uint8_t button_callback_type, void *args);
+int adv_button_register_callback_fn(const uint8_t gpio, const button_callback_fn callback, const button_event_type_t event_type, void *args);
 
 #endif // __ADVANCED_BUTTON__

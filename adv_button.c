@@ -257,17 +257,17 @@ int adv_button_create(const uint8_t gpio, const bool pullup_resistor, const bool
     return -1;
 }
 
-int adv_button_register_callback_fn(const uint8_t gpio, const button_callback_fn callback, const uint8_t button_callback_type, void *args) {
+int adv_button_register_callback_fn(const uint8_t gpio, const button_callback_fn callback, const button_event_type_t event_type, void *args) {
     adv_button_t *button = button_find_by_gpio(gpio);
     
     if (button) {
-        switch (button_callback_type) {
-            case 0:
+        switch (event_type) {
+            case button_event_type_singlepress0:
                 button->singlepress0_callback_fn = callback;
                 button->holdpress_callback_fn = NULL;
                 button->holdpress_args = args;
                 break;
-            case 1:
+            case button_event_type_singlepress:
                 if (callback) {
                     button->singlepress_callback_fn = callback;
                     button->singlepress_args = args;
@@ -276,22 +276,22 @@ int adv_button_register_callback_fn(const uint8_t gpio, const button_callback_fn
                 }
                 break;
                 
-            case 2:
+            case button_event_type_doublepress:
                 button->doublepress_callback_fn = callback;
                 button->doublepress_args = args;
                 break;
                 
-            case 3:
+            case button_event_type_longpress:
                 button->longpress_callback_fn = callback;
                 button->longpress_args = args;
                 break;
                 
-            case 4:
+            case button_event_type_verylongpress:
                 button->verylongpress_callback_fn = callback;
                 button->verylongpress_args = args;
                 break;
                 
-            case 5:
+            case button_event_type_holdpress:
                 button->holdpress_callback_fn = callback;
                 button->singlepress0_callback_fn = NULL;
                 button->holdpress_args = args;
