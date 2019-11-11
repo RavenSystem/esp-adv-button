@@ -35,27 +35,27 @@
 #define TOGGLE_GPIO     2
 #endif
 
-void singlepress_callback(uint8_t gpio, void *args) {
+void singlepress_callback(const uint8_t gpio, void *args, const uint8_t param) {
     printf(">>>>> Example button: Single Press function called using GPIO->%i\n", gpio);
 }
 
-void doublepress_callback(uint8_t gpio, void *args) {
+void doublepress_callback(const uint8_t gpio, void *args, const uint8_t param) {
     printf(">>>>> Example button: Double Press function called using GPIO->%i\n", gpio);
 }
 
-void longpress_callback(uint8_t gpio, void *args) {
+void longpress_callback(const uint8_t gpio, void *args, const uint8_t param) {
     printf(">>>>> Example button: Long Press function called using GPIO->%i\n", gpio);
 }
 
-void verylongpress_callback(uint8_t gpio, void *args) {
+void verylongpress_callback(const uint8_t gpio, void *args, const uint8_t param) {
     printf(">>>>> Example button: Very Long Press function called using GPIO->%i\n", gpio);
 }
 
-void holdpress_callback(uint8_t gpio, void *args) {
+void holdpress_callback(const uint8_t gpio, void *args, const uint8_t param) {
     printf(">>>>> Example button: Hold Press function called using GPIO->%i\n", gpio);
 }
 
-void toggle_callback(uint8_t gpio, void *args) {
+void toggle_callback(const uint8_t gpio, void *args, const uint8_t param) {
     printf(">>>>> Example button: Toggle function called using GPIO->%i\n", gpio);
 }
 
@@ -68,14 +68,14 @@ void user_init(void) {
     
     adv_button_create(BUTTON_GPIO, true, false);
     
-    adv_button_register_callback_fn(BUTTON_GPIO, singlepress_callback, 1, NULL);
-    adv_button_register_callback_fn(BUTTON_GPIO, doublepress_callback, 2, NULL);
-    adv_button_register_callback_fn(BUTTON_GPIO, longpress_callback, 3, NULL);
-    adv_button_register_callback_fn(BUTTON_GPIO, verylongpress_callback, 4, NULL);
-    adv_button_register_callback_fn(BUTTON_GPIO, holdpress_callback, 5, NULL);
+    adv_button_register_callback_fn(BUTTON_GPIO, singlepress_callback, SINGLEPRESS_TYPE, NULL, 0);
+    adv_button_register_callback_fn(BUTTON_GPIO, doublepress_callback, DOUBLEPRESS_TYPE, NULL, 0);
+    adv_button_register_callback_fn(BUTTON_GPIO, longpress_callback, LONGPRESS_TYPE, NULL, 0);
+    adv_button_register_callback_fn(BUTTON_GPIO, verylongpress_callback, VERYLONGPRESS_TYPE, NULL, 0);
+    adv_button_register_callback_fn(BUTTON_GPIO, holdpress_callback, HOLDPRESS_TYPE, NULL, 0);
     
     adv_button_create(TOGGLE_GPIO, true, false);
-    adv_button_register_callback_fn(TOGGLE_GPIO, toggle_callback, 0, NULL);     // Low
-    adv_button_register_callback_fn(TOGGLE_GPIO, toggle_callback, 1, NULL);     // High
+    adv_button_register_callback_fn(TOGGLE_GPIO, toggle_callback, INVSINGLEPRESS_TYPE, NULL, 0);     // Low
+    adv_button_register_callback_fn(TOGGLE_GPIO, toggle_callback, SINGLEPRESS_TYPE, NULL, 0);     // High
 }
 ```
