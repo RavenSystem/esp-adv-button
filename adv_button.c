@@ -1,19 +1,8 @@
 /*
  * Advanced Button Manager
  *
- * Copyright 2018-2019 José A. Jiménez (@RavenSystem)
+ * Copyright 2019-2020 José Antonio Jiménez Campos (@RavenSystem)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 /*
@@ -26,36 +15,45 @@
 #include <esplibs/libmain.h>
 #include "adv_button.h"
 
-#ifndef ADV_BUTTON_MAX_EVAL
-#define ADV_BUTTON_MAX_EVAL         10
-#endif
+#define ADV_BUTTON_MAX_EVAL         (6)
 
-#define DOUBLEPRESS_TIME            400
+#define DOUBLEPRESS_TIME            (400)
 #define LONGPRESS_TIME              (DOUBLEPRESS_TIME + 10)
-#define VERYLONGPRESS_TIME          1500
-#define HOLDPRESS_TIME              10000
+#define VERYLONGPRESS_TIME          (1500)
+#define HOLDPRESS_TIME              (8000)
 
-#define BUTTON_EVAL_DELAY_MIN       10
-#define BUTTON_EVAL_DELAY_MAX       (BUTTON_EVAL_DELAY_MIN + 200)
+#define BUTTON_EVAL_DELAY_MIN       (10)
+#define BUTTON_EVAL_DELAY_DEFAULT   (10)
+#define BUTTON_EVAL_DELAY_MAX       (BUTTON_EVAL_DELAY_MIN + 245)
 
-#define DISABLE_PRESS_COUNT         200
+#define DISABLE_PRESS_COUNT         (200)
 
-#define EVALUATE_MID                (ADV_BUTTON_MAX_EVAL >> 1)
 #define DISABLE_TIME                (ADV_BUTTON_MAX_EVAL * 10)
 #define MIN(x, y)                   (((x) < (y)) ? (x) : (y))
 #define MAX(x, y)                   (((x) > (y)) ? (x) : (y))
 
 typedef struct _adv_button_callback_fn {
-    button_callback_fn callback;
-    void *args;
     uint8_t param;
+    button_callback_fn callback;
     
+    void *args;
+
     struct _adv_button_callback_fn *next;
 } adv_button_callback_fn_t;
 
 typedef struct _adv_button {
     uint8_t gpio;
+    uint8_t press_count;
+    volatile uint8_t value;
+    
     bool inverted;
+    bool state;
+    bool old_state;
+    
+    ETSTimer press_timer;
+    ETSTimer hold_timer;
+    
+    volatile uint32_t last_event_time;
     
     adv_button_callback_fn_t *singlepress0_callback_fn;
     adv_button_callback_fn_t *singlepress_callback_fn;
@@ -63,21 +61,13 @@ typedef struct _adv_button {
     adv_button_callback_fn_t *longpress_callback_fn;
     adv_button_callback_fn_t *verylongpress_callback_fn;
     adv_button_callback_fn_t *holdpress_callback_fn;
-    
-    bool state;
-    bool old_state;
-    volatile uint8_t value;
-
-    uint8_t press_count;
-    ETSTimer press_timer;
-    ETSTimer hold_timer;
-    volatile uint32_t last_event_time;
 
     struct _adv_button *next;
 } adv_button_t;
 
 static uint32_t disable_time = 0;
-static uint8_t button_evaluate_delay = BUTTON_EVAL_DELAY_MIN;
+static uint8_t button_evaluate_delay = BUTTON_EVAL_DELAY_DEFAULT;
+static int8_t button_evaluate_count = ADV_BUTTON_MAX_EVAL;
 static bool button_evaluate_is_working = false;
 static ETSTimer button_evaluate_timer;
 
@@ -105,6 +95,11 @@ static void adv_button_run_callback_fn(adv_button_callback_fn_t *callbacks, cons
 void adv_button_set_evaluate_delay(const uint8_t new_delay) {
     if (new_delay < BUTTON_EVAL_DELAY_MIN) {
         button_evaluate_delay = BUTTON_EVAL_DELAY_MIN;
+        
+        button_evaluate_count -= (10 - new_delay);
+        if (button_evaluate_count < 1) {
+            button_evaluate_count = 1;
+        }
     } else if (new_delay > BUTTON_EVAL_DELAY_MAX) {
         button_evaluate_delay = BUTTON_EVAL_DELAY_MAX;
     } else {
@@ -200,18 +195,22 @@ IRAM static void button_evaluate_fn() {
         while (button) {
             if (gpio_read(button->gpio)) {
                 button->value = MIN(button->value++, ADV_BUTTON_MAX_EVAL);
+                if (button->value == ADV_BUTTON_MAX_EVAL) {
+                    button->state = true;
+                }
             } else {
                 button->value = MAX(button->value--, 0);
+                if (button->value == 0) {
+                    button->state = false;
+                }
             }
-            
-            button->state = (button->value > EVALUATE_MID);
-            
+
             if (button->state != button->old_state) {
                 button->old_state = button->state;
                 
-                if (gpio_read(button->gpio) ^ button->inverted) {   // 1 HIGH
+                if (button->state ^ button->inverted) {     // 1 HIGH
                     push_up(button->gpio);
-                } else {                                            // 0 LOW
+                } else {                                    // 0 LOW
                     push_down(button->gpio);
                 }
             }
@@ -251,8 +250,13 @@ int adv_button_create(const uint8_t gpio, const bool pullup_resistor, const bool
         button->state = gpio_read(button->gpio);
         
         button->old_state = button->state;
-        button->value = EVALUATE_MID;
         
+        if (button->state) {
+            button->value = ADV_BUTTON_MAX_EVAL;
+        } else {
+            button->value = 0;
+        }
+
         sdk_os_timer_setfn(&button->hold_timer, adv_button_hold_callback, button);
         sdk_os_timer_setfn(&button->press_timer, adv_button_single_callback, button);
         

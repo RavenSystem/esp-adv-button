@@ -1,19 +1,8 @@
 /*
  * Advanced Button Manager
  *
- * Copyright 2018-2019 José A. Jiménez (@RavenSystem)
+ * Copyright 2019-2020 José Antonio Jiménez Campos (@RavenSystem)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 /*
@@ -24,12 +13,12 @@
 #ifndef __ADVANCED_BUTTON__
 #define __ADVANCED_BUTTON__
 
-#define INVSINGLEPRESS_TYPE         0
-#define SINGLEPRESS_TYPE            1
-#define DOUBLEPRESS_TYPE            2
-#define LONGPRESS_TYPE              3
-#define VERYLONGPRESS_TYPE          4
-#define HOLDPRESS_TYPE              5
+#define INVSINGLEPRESS_TYPE         (0)
+#define SINGLEPRESS_TYPE            (1)
+#define DOUBLEPRESS_TYPE            (2)
+#define LONGPRESS_TYPE              (3)
+#define VERYLONGPRESS_TYPE          (4)
+#define HOLDPRESS_TYPE              (5)
 
 typedef void (*button_callback_fn)(uint8_t gpio, void *args, uint8_t param);
 
