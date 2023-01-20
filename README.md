@@ -4,6 +4,10 @@
 
 Library for esp-open-rtos SDK to manage inputs from built-in GPIOs and MCP23017 interfaces.
 
+Requirements:
+- Timers Helper: https://github.com/RavenSystem/timers-helper
+- Advanced I2C: https://github.com/RavenSystem/adv-i2c
+
 ```c
 /*
  * Advanced Button Manager Example
