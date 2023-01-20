@@ -4,6 +4,13 @@
 
 Library for esp-open-rtos SDK to manage inputs from built-in GPIOs and MCP23017 interfaces.
 
+When MCP23017 is used, GPIOs must be declared with this:
+```c
+adv_button_create(GPIO + (MCP_Index * 100), I2C Bus, Inverted, MCP Address);
+```
+
+Where MCP_Index is the number from `1` to enumerate all MCP boards, in case that several boards are used. 
+
 Requirements:
 - Timers Helper: https://github.com/RavenSystem/timers-helper
 - Advanced I2C: https://github.com/RavenSystem/adv-i2c
